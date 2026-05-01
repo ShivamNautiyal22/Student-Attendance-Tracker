@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 
 
 class AttendanceRecord(models.Model):
@@ -24,6 +25,7 @@ class AttendanceRecord(models.Model):
         related_name="subject_attendance_records",
     )
     date = models.DateField()
+    marked_at = models.DateTimeField(default=timezone.now)
     marked_present = models.BooleanField(default=True)
     verification_status = models.CharField(
         max_length=20, choices=VERIFICATION_CHOICES, default=PENDING
