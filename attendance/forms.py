@@ -2,9 +2,12 @@ from django import forms
 
 
 class AttendanceMarkForm(forms.Form):
-    subject = forms.ChoiceField(choices=[])
+    enrollment = forms.ChoiceField(choices=[])
 
-    def __init__(self, *args, available_subjects=None, **kwargs):
+    def __init__(self, *args, available_enrollments=None, **kwargs):
         super().__init__(*args, **kwargs)
-        subjects = available_subjects or []
-        self.fields["subject"].choices = [(subject, subject) for subject in subjects]
+        enrollments = available_enrollments or []
+        self.fields["enrollment"].choices = [
+            (str(enrollment.id), f"{enrollment.teacher.subject} ({enrollment.teacher.username})")
+            for enrollment in enrollments
+        ]
