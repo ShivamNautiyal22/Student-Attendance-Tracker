@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Student Dashboard | Student Attendance Tracker{% endblock %}
+{% block content %}
+<section class="card">
+    <h1 class="title">Student Dashboard</h1>
+    <p class="subtitle">Mark attendance and track verification status for each subject.</p>
+
+    <div class="card mt-4" style="max-width: 520px;">
+        <h3 style="margin-top:0;">Mark Attendance</h3>
+        <form id="attendance-form">
+            {% csrf_token %}
+            <label>Choose Class
+                <select name="enrollment" required>
+                    {% for item in available_enrollments %}
+                        <option value="{{ item.enrollment_id }}">{{ item.subject }} ({{ item.teacher_username }})</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <button class="btn btn-primary mt-3" type="submit">Mark Present</button>
+        </form>
+        <p id="attendance-result" class="subtitle mt-2"></p>
+    </div>
+</section>
+
+<section class="card mt-4">
+    <h2 style="margin-top:0;">Attendance History</h2>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Teacher</th>
+                    <th>Date</th>
+                    <th>Marked At</th>
+                    <th>Status</th>
+                    <th>Reviewed By</th>
+                </tr>
+            </thead>
+            <tbody id="records-body">
+                {% for record in records %}
+                    <tr>
+                        <td>{{ record.subject }}</td>
+                        <td>{{ record.teacher }}</td>
+                        <td>{{ record.date }}</td>
+                        <td>{{ record.marked_at }}</td>
+                        <td><span class="badge {{ record.verification_status }}">{{ record.verification_status }}</span></td>
+                        <td>{{ record.reviewed_by|default:"-" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6">No attendance records yet.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<script>
+    (function () {
+        const form = document.getElementById("attendance-form");
+        const result = document.getElementById("attendance-result");
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            const response = await fetch("{% url 'student-dashboard' %}", {
+                method: "POST",
+                body: new FormData(form),
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            });
+            const payload = await response.json();
+            if (!response.ok) {
+                result.textContent = payload.error || "Unable to mark attendance.";
+                return;
+            }
+            result.textContent = payload.message || "Attendance marked successfully.";
+            window.location.reload();
+        });
+    }());
+</script>
+{% endblock %}

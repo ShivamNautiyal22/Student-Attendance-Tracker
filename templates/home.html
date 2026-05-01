@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Home | Student Attendance Tracker{% endblock %}
+{% block content %}
+<section class="card">
+    <h1 class="title">Modern Attendance Management</h1>
+    <p class="subtitle">Track daily attendance, verify records, and monitor class progress from a clean dashboard.</p>
+    <div class="grid grid-2 mt-4">
+        <div class="card">
+            <h3>For Students</h3>
+            <p class="subtitle">Mark attendance quickly and view verification status from your teachers.</p>
+            {% if user.is_authenticated and user.role == "student" %}
+                <a class="btn btn-primary mt-3" href="{% url 'student-dashboard' %}">Go to Student Dashboard</a>
+            {% else %}
+                <a class="btn btn-primary mt-3" href="{% url 'register' %}">Get Started as Student</a>
+            {% endif %}
+        </div>
+        <div class="card">
+            <h3>For Teachers</h3>
+            <p class="subtitle">Review submissions, verify records, update comments, and manage active students.</p>
+            {% if user.is_authenticated and user.role == "teacher" %}
+                <a class="btn btn-success mt-3" href="{% url 'teacher-dashboard' %}">Go to Teacher Dashboard</a>
+            {% else %}
+                <a class="btn btn-success mt-3" href="{% url 'register' %}">Create Teacher Account</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
