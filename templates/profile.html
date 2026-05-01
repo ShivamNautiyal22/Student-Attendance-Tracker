@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Profile | Student Attendance Tracker{% endblock %}
+{% block content %}
+<section class="grid grid-2">
+    <div class="card">
+        <h1 class="title">Profile</h1>
+        <p class="subtitle">Your account information and role details.</p>
+        <div class="mt-4">
+            <p><strong>Username:</strong> {{ profile.username }}</p>
+            <p><strong>Email:</strong> {{ profile.email }}</p>
+            <p><strong>Role:</strong> {{ profile.role|title }}</p>
+            <p><strong>Subject:</strong> {{ profile.subject|default:"-" }}</p>
+            <p><strong>Bio:</strong> {{ profile.bio|default:"-" }}</p>
+            {% if users_count %}
+                <p><strong>Total Users:</strong> {{ users_count }}</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="card">
+        <h2 style="margin-top:0;">Active Enrollments</h2>
+        {% if enrollments %}
+            {% for enrollment in enrollments %}
+                <div class="card mt-3">
+                    <p><strong>Teacher:</strong> {{ enrollment.teacher }}</p>
+                    <p><strong>Student:</strong> {{ enrollment.student }}</p>
+                    <p><strong>Comment:</strong> {{ enrollment.progress_comment|default:"No comment yet." }}</p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="subtitle">No active enrollments available.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

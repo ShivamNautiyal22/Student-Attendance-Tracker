@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -9,6 +9,15 @@ from users.models import ClassEnrollment
 
 from .forms import AttendanceMarkForm
 from .models import AttendanceRecord
+
+
+def _wants_json(request):
+    accept = (request.headers.get("Accept") or "").lower()
+    return (
+        request.GET.get("format") == "json"
+        or request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        or ("application/json" in accept and "text/html" not in accept)
+    )
 
 
 @login_required
@@ -60,31 +69,32 @@ def student_dashboard_view(request):
             )
         return JsonResponse({"errors": form.errors}, status=400)
 
-    return JsonResponse(
-        {
-            "available_enrollments": [
-                {
-                    "enrollment_id": enrollment.id,
-                    "teacher_id": enrollment.teacher.id,
-                    "teacher_username": enrollment.teacher.username,
-                    "subject": enrollment.teacher.subject,
-                }
-                for enrollment in enrollments
-            ],
-            "records": [
-                {
-                    "id": record.id,
-                    "subject": record.subject,
-                    "teacher": record.subject_teacher.username,
-                    "date": record.date.isoformat(),
-                    "marked_at": record.marked_at.isoformat(),
-                    "verification_status": record.verification_status,
-                    "reviewed_by": record.reviewed_by.username if record.reviewed_by else None,
-                }
-                for record in records
-            ],
-        }
-    )
+    payload = {
+        "available_enrollments": [
+            {
+                "enrollment_id": enrollment.id,
+                "teacher_id": enrollment.teacher.id,
+                "teacher_username": enrollment.teacher.username,
+                "subject": enrollment.teacher.subject,
+            }
+            for enrollment in enrollments
+        ],
+        "records": [
+            {
+                "id": record.id,
+                "subject": record.subject,
+                "teacher": record.subject_teacher.username,
+                "date": record.date.isoformat(),
+                "marked_at": record.marked_at.isoformat(),
+                "verification_status": record.verification_status,
+                "reviewed_by": record.reviewed_by.username if record.reviewed_by else None,
+            }
+            for record in records
+        ],
+    }
+    if _wants_json(request):
+        return JsonResponse(payload)
+    return render(request, "student_dashboard.html", payload)
 
 
 @login_required
@@ -101,31 +111,32 @@ def teacher_dashboard_view(request):
     records = AttendanceRecord.objects.filter(subject_teacher=request.user).select_related(
         "student", "reviewed_by"
     )
-    return JsonResponse(
-        {
-            "students": [
-                {
-                    "enrollment_id": enrollment.id,
-                    "student_id": enrollment.student.id,
-                    "student_username": enrollment.student.username,
-                    "progress_comment": enrollment.progress_comment,
-                }
-                for enrollment in students
-            ],
-            "records": [
-                {
-                    "record_id": record.id,
-                    "student": record.student.username,
-                    "subject": record.subject,
-                    "date": record.date.isoformat(),
-                    "marked_at": record.marked_at.isoformat(),
-                    "verification_status": record.verification_status,
-                    "reviewed_by": record.reviewed_by.username if record.reviewed_by else None,
-                }
-                for record in records
-            ],
-        }
-    )
+    payload = {
+        "students": [
+            {
+                "enrollment_id": enrollment.id,
+                "student_id": enrollment.student.id,
+                "student_username": enrollment.student.username,
+                "progress_comment": enrollment.progress_comment,
+            }
+            for enrollment in students
+        ],
+        "records": [
+            {
+                "record_id": record.id,
+                "student": record.student.username,
+                "subject": record.subject,
+                "date": record.date.isoformat(),
+                "marked_at": record.marked_at.isoformat(),
+                "verification_status": record.verification_status,
+                "reviewed_by": record.reviewed_by.username if record.reviewed_by else None,
+            }
+            for record in records
+        ],
+    }
+    if _wants_json(request):
+        return JsonResponse(payload)
+    return render(request, "teacher_dashboard.html", payload)
 
 
 @login_required
