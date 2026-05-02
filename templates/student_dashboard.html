@@ -9,10 +9,10 @@
         <h3 style="margin-top:0;">Mark Attendance</h3>
         <form id="attendance-form">
             {% csrf_token %}
-            <label>Choose Class
-                <select name="enrollment" required>
-                    {% for item in available_enrollments %}
-                        <option value="{{ item.enrollment_id }}">{{ item.subject }} ({{ item.teacher_username }})</option>
+            <label>Choose Subject
+                <select name="teacher" required>
+                    {% for item in available_teachers %}
+                        <option value="{{ item.id }}">{{ item.subject }} ({{ item.username }})</option>
                     {% endfor %}
                 </select>
             </label>

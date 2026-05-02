@@ -3,7 +3,7 @@
 {% block content %}
 <section class="card">
     <h1 class="title">Teacher Dashboard</h1>
-    <p class="subtitle">Verify student attendance, maintain comments, and manage your class list.</p>
+    <p class="subtitle">Verify student attendance and review attendance requests for your subject.</p>
 </section>
 
 <section class="card mt-4">
@@ -48,36 +48,8 @@
 </section>
 
 <section class="card mt-4">
-    <h2 style="margin-top:0;">Class Students</h2>
-    <div class="table-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th>Student</th>
-                    <th>Progress Comment</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for student in students %}
-                    <tr>
-                        <td>{{ student.student_username }}</td>
-                        <td>
-                            <input type="text" id="comment-{{ student.enrollment_id }}" value="{{ student.progress_comment }}">
-                        </td>
-                        <td>
-                            <button class="btn btn-primary comment-btn" data-id="{{ student.enrollment_id }}">Save Comment</button>
-                            <button class="btn btn-danger remove-btn" data-id="{{ student.enrollment_id }}">Remove</button>
-                        </td>
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="3">No active students in your class.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+    <h2 style="margin-top:0;">Teacher Bio</h2>
+    <p class="subtitle">{{ bio|default:"No bio provided." }}</p>
 </section>
 
 <script>
@@ -108,35 +80,7 @@
             });
         });
 
-        document.querySelectorAll(".comment-btn").forEach(function (button) {
-            button.addEventListener("click", async function () {
-                const enrollmentId = button.dataset.id;
-                const input = document.getElementById(`comment-${enrollmentId}`);
-                const data = new FormData();
-                data.append("progress_comment", input.value);
-                try {
-                    await postForm(`/attendance/teacher/class/${enrollmentId}/comment/`, data);
-                    alert("Comment saved.");
-                } catch (error) {
-                    alert(error.message);
-                }
-            });
-        });
 
-        document.querySelectorAll(".remove-btn").forEach(function (button) {
-            button.addEventListener("click", async function () {
-                const enrollmentId = button.dataset.id;
-                if (!confirm("Remove this student from class?")) {
-                    return;
-                }
-                try {
-                    await postForm(`/attendance/teacher/class/${enrollmentId}/remove/`, new FormData());
-                    window.location.reload();
-                } catch (error) {
-                    alert(error.message);
-                }
-            });
-        });
     }());
 </script>
 {% endblock %}
