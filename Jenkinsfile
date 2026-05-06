@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        AWS_REGION     = 'us-east-1'
+        AWS_REGION     = 'eu-west-2'
         ECR_REPO       = 'student-tracker'
         AWS_ACCOUNT_ID = credentials('AWS_ACCOUNT_ID')
         ECR_URI        = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}"
@@ -38,7 +38,7 @@ pipeline {
             steps {
                 sh """
                     ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ubuntu@${APP_EC2_IP} '
-                        aws ecr get-login-password --region us-east-1 | \
+                        aws ecr get-login-password --region eu-west-2 | \
                         docker login --username AWS --password-stdin ${ECR_URI}
                         docker pull ${ECR_URI}:latest
                         docker stop student-tracker || true
