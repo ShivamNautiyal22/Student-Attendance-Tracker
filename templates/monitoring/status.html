@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}System Status — Student Attendance Tracker{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1 class="title">System Status</h1>
+    <p class="subtitle">Simple reliability dashboard (SRE) — no extra tools required</p>
+</div>
+
+<div class="grid grid-2 mt-4">
+    <div class="card">
+        <h2>Application</h2>
+        <p class="mt-3">
+            <span class="badge {% if app_healthy %}verified{% else %}rejected{% endif %}">
+                {{ app_status }}
+            </span>
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>Database</h2>
+        <p class="mt-3">
+            <span class="badge {% if database_healthy %}verified{% else %}rejected{% endif %}">
+                {{ database_status }}
+            </span>
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>Current server time</h2>
+        <p class="mt-3" style="font-size: 1.1rem;">{{ current_time }}</p>
+    </div>
+
+    <div class="card">
+        <h2>Health check API</h2>
+        <p class="mt-3 subtitle">
+            Machine-readable status:
+            <a href="{% url 'health-check' %}">/health/</a>
+        </p>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <h2>Recent log messages</h2>
+    <p class="subtitle">Last 8 lines from <code>logs/app.log</code></p>
+    <pre class="mt-3" style="white-space: pre-wrap; word-break: break-word; background: #0b1220; padding: 14px; border-radius: 10px; border: 1px solid rgba(148,163,184,0.25); color: #cbd5e1; font-size: 0.85rem;">{% for line in recent_logs %}{{ line }}
+{% endfor %}</pre>
+</div>
+{% endblock %}

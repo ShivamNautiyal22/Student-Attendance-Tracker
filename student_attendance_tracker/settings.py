@@ -17,6 +17,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "users",
     "attendance",
+    "monitoring",  # SRE: health check and status page
 ]
 
 MIDDLEWARE = [
@@ -76,3 +77,45 @@ AUTH_USER_MODEL = "users.User"
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
+
+# --- SRE: Simple JSON logging ---
+# Logs are written to logs/app.log and shown on the /status page.
+LOGS_DIR = BASE_DIR / "logs"
+LOGS_DIR.mkdir(exist_ok=True)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        # Each log line looks like JSON (easy to read and search)
+        "json": {
+            "format": (
+                '{{"level": "{levelname}", "time": "{asctime}", '
+                '"logger": "{name}", "message": "{message}"}}'
+            ),
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "json",
+        },
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": LOGS_DIR / "app.log",
+            "formatter": "json",
+        },
+    },
+    "root": {
+        "handlers": ["console", "file"],
+        "level": "INFO",
+    },
+    "loggers": {
+        "django.request": {
+            "handlers": ["console", "file"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+    },
+}
